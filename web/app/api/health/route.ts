@@ -27,7 +27,7 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    app: "entymalia-web",
+    app: "etymalia-web",
     status: "ok",
     supabase,
     time: new Date().toISOString(),

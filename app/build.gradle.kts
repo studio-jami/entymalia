@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-  namespace = "studio.jami.entymalia"
+  namespace = "studio.jami.etymalia"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "studio.jami.entymalia"
+    applicationId = "studio.jami.etymalia"
     minSdk = 24
     targetSdk = 36
     versionCode = 1

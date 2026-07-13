@@ -1,8 +1,8 @@
 {
-  "name": "entymalia-web",
+  "name": "etymalia-web",
   "version": "0.1.0",
   "private": true,
-  "description": "Entymalia web app — Next.js + Supabase, deployed to Vercel at entymalia.jami.studio",
+  "description": "Etymalia web app — Next.js + Supabase, deployed to Vercel at etymalia.jami.studio",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -1,6 +1,8 @@
-# Entymalia
+# Etymalia
 
-Entymalia is an AI-powered brand identity application built with native Android, Jetpack Compose, and Google's Gemini/Veo APIs. Generate consistent logos, marketing assets, color palettes, and video promos directly from your device.
+Etymalia is an AI-powered brand identity platform. The **Android app** (native Kotlin + Jetpack Compose + Google Gemini/Veo) generates logos, marketing assets, color palettes, and video promos. A **web platform** (Next.js + Supabase on Vercel, in active development at `etymalia.jami.studio`) is expanding this into a full brand generator, featuring the **Etymaria** etymology-driven name engine.
+
+Backend is **Supabase**; AI calls are proxied server-side (never from the client).
 
 ## Prerequisites
 
@@ -24,8 +26,9 @@ Comprehensive guides are available in the `docs/` folder:
 
 - **[Project Audit](./docs/AUDIT.md)**: Current state and technical architecture.
 - **[App Signing & Local Installation](./docs/APP_SIGNING.md)**: How to export the app without a developer account.
-- **[Web App Conversion](./docs/WEB_APP.md)**: Path to making Entymalia a web-app (Compose Multiplatform).
-- **[Roadmap](./docs/ROADMAP.md)**: Planned features and improvements.
+- **[Web Platform](./docs/WEB_APP.md)**: The Next.js + Supabase web app (`etymalia.jami.studio`).
+- **[Web Platform Master Plan](./docs/research/webapp_master_plan.md)**: Full architecture, tooling, and phasing for the brand generator.
+- **[Roadmap](./docs/roadmap.md)**: Planned features and improvements.
 - **[IDE Guide](./docs/IDE_GUIDE.md)**: Android Studio vs VS Code workflows.
 - **[Performance & Defender Exclusions](./docs/DEFENDER_EXCLUSIONS.md)**: Speeding up build times on Windows.
 

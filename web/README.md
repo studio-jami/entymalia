@@ -1,6 +1,6 @@
-# Entymalia Web
+# Etymalia Web
 
-The web client for **Entymalia**, built with **Next.js (App Router)** and **Supabase**, deployed to **Vercel** at `entymalia.jami.studio`.
+The web client for **Etymalia**, built with **Next.js (App Router)** and **Supabase**, deployed to **Vercel** at `etymalia.jami.studio`.
 
 It is one of two clients of the same Supabase backend (the other is the native Android app). All AI calls go through the Supabase `gemini-proxy` edge function — the web app never holds the Gemini key.
 

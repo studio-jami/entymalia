@@ -1,7 +1,7 @@
 {
-  "name": "entymalia-marketing",
+  "name": "etymalia-marketing",
   "version": "1.0.0",
-  "description": "Marketing landing page for Entymalia",
+  "description": "Marketing landing page for Etymalia",
   "scripts": {
     "start": "npx serve ."
   }

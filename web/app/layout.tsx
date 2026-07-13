@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Entymalia",
+  title: "Etymalia",
   description:
-    "Entymalia — AI-powered brand identity. Consistent logos, assets, palettes, and video promos.",
+    "Etymalia — AI-powered brand identity. Consistent logos, assets, palettes, and video promos.",
 };
 
 export default function RootLayout({

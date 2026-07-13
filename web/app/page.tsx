@@ -17,7 +17,7 @@ export default async function Home() {
   return (
     <main className="wrap">
       <h1 className="brand">
-        Entymalia<span className="gradient">.</span>
+        Etymalia<span className="gradient">.</span>
       </h1>
       <p className="tagline">
         AI-powered brand identity — consistent logos, marketing assets, color

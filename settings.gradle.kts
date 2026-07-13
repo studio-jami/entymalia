@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Entymalia"
+rootProject.name = "Etymalia"
 
 include(":app")

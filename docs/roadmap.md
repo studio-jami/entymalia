@@ -1,19 +1,47 @@
-# Entymalia Roadmap
+# Etymalia Roadmap
 
-*July 2026*
+*Updated July 2026*
 
-## Phase 1: Stability & Security (Near Term)
-1. **Move Secrets to Backend**: Currently, the Gemini API key is stored in the app (`BuildConfig.GEMINI_API_KEY`). This is a security risk for production. Move API calls to Firebase Cloud Functions or a custom Ktor backend.
-2. **Dependency Injection**: Migrate manual `ViewModelProvider.Factory` implementations to **Hilt** for cleaner Architecture.
-3. **Robust Error Handling**: Implement an MVI-style `UiState` and `UiEvent` pattern to gracefully handle API errors, rate limits, and network issues.
+Etymalia is evolving from a native Android brand-asset app into a **professional-grade brand generator platform** (web + Android), with the resurrected **Etymaria** etymology name engine as its signature capability.
 
-## Phase 2: Feature Expansion (Mid Term)
-1. **Cloud Sync**: Utilize the commented-out Firebase Firestore dependencies to allow users to sync their brand profiles across devices.
-2. **Auth Integration**: Enable Firebase Authentication (Google Sign-In) to gate features and associate brands with user accounts.
-3. **Advanced Video Controls**: Expose more Veo 3.1 parameters in the `generateVideo` function (e.g., camera motion, duration, mood).
-4. **Export Options**: Add native Android Share intents (`Intent.ACTION_SEND`) so users can export SVGs and MP4s directly to Slack, Drive, or Email.
+> The web platform's full architecture and tooling choices live in
+> [`docs/research/webapp_master_plan.md`](./research/webapp_master_plan.md).
+> This roadmap is the high-level sequencing view.
 
-## Phase 3: Platform Expansion (Long Term)
-1. **Compose Multiplatform (Web)**: Compile the existing Compose UI to WebAssembly (Wasm) to provide a seamless browser-based experience without rewriting the UI.
-2. **iOS Support**: Add a Kotlin Multiplatform target for iOS using Compose for iOS. 
-3. **Pro Subscription Model**: Integrate Google Play Billing to offer premium features (like 4K video rendering or bulk icon generation).
+## Guiding constraints (see `AGENTS.md`)
+- Backend is **Supabase** (Auth + Postgres + Storage + Edge Functions). No Firebase.
+- AI never called from clients — routed via server (Edge Function `gemini-proxy` on Android; server route handlers / provider-direct SDKs on web).
+- Android UI is **Jetpack Compose + Material 3**; DI is **manual by design** (no Hilt/Dagger).
+- Web is **Next.js 15 + React 19 on Vercel**, not Compose Multiplatform.
+
+---
+
+## Track A — Android app (stabilize)
+1. **Remove leftover key guard**: `BrandViewModel.generateBrandColorPalette()` still references `BuildConfig.GEMINI_API_KEY`; it already routes through `gemini-proxy` — delete the guard.
+2. **UiState/UiEvent**: adopt an MVI-style `UiState`/`UiEvent` wrapper for clean error, rate-limit, and loading handling.
+3. **Externalize strings**: move hardcoded UI text into `strings.xml`.
+4. **Native share/export**: `Intent.ACTION_SEND` for SVG/MP4 export.
+
+## Track B — Web platform (build) — *primary focus*
+Phased per the master plan:
+
+- **Phase 0 — Foundations:** Turborepo; `@etymalia/ai` provider port (Google/Vertex default, credential resolver for internal/BYOK/OAuth); data model + RLS; Supabase Vault for BYOK keys.
+- **Phase 1 — MVP:** Etymaria naming (keyword → blended candidates + provenance → **RDAP** domain availability) · OKLCH palette (contrast-checked) · one logo → vectorize → variant matrix · favicons · **zip export**.
+- **Phase 2 — Full kit:** social kits (satori) · brand guide book (**prototype Typst *and* react-pdf**) · reference import (Uppy) · **Trigger.dev** orchestration for full-kit generation.
+- **Phase 3 — Deliverable depth + monetization:** email signature (MJML) · digital business card + branded QR + vCard · letterhead · templates gallery · **Stripe** subscription over BYOK · social/SEO availability behind flags · registrar **buy-through + affiliate**.
+- **Phase 4 — Scale:** multi-member workspaces · brand-audit loop · premium templates · export API.
+
+## Track C — Etymaria name engine (signature moat)
+1. **Re-export the source corpus** (`docs/references/etymology_brand_table…`) to clean UTF-8 — current CSV has mangled Greek/diacritics.
+2. Load into **Postgres + pgvector** (roots, semantic fields, cross-linguistic layers, drift notes, tone, syllables, candidates).
+3. Blending engine (portmanteau/affixation/compounding across language families) + scoring (meaning fit × pronounceability × availability × brevity).
+4. Grow the curated corpus beyond the initial 281 rows — the editorial layer is the defensible asset.
+
+---
+
+## Two deliberate lanes (internal vs prod)
+Same AI port, different credential resolver — see master plan §5.1 and §11:
+- **Studio lane (internal):** our pooled credits (Vertex now), all premium models, high limits.
+- **Prod lane (users):** BYOK (zero COGS) or charge-through (Stripe-metered); optional OAuth-Google.
+
+They need not be feature-equal.

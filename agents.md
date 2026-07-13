@@ -3,9 +3,9 @@
 If you are an AI assistant or Agent (like GitHub Copilot, Gemini, or Claude) modifying this project, please adhere to the following guidelines:
 
 ## Project Identity
-- The official product name is **Entymalia**. The GitHub repo and Supabase project use this name.
-- Android application ID / namespace: `studio.jami.entymalia`.
-- The web app's home will be `entymalia.jami.studio` (deployed to Vercel — not built yet).
+- The official product name is **Etymalia**. The GitHub repo and Supabase project use this name.
+- Android application ID / namespace: `studio.jami.etymalia`.
+- The web app's home will be `etymalia.jami.studio` (deployed to Vercel — not built yet).
 
 ## Architecture Constraints
 1. **Jetpack Compose Only**: All new UI must be written in declarative Jetpack Compose. Do not use XML layouts for new screens.
@@ -32,3 +32,9 @@ If you are an AI assistant or Agent (like GitHub Copilot, Gemini, or Claude) mod
 - Add Unit Tests in `app/src/test/`.
 - UI Tests should use Compose UI Test framework in `app/src/androidTest/`.
 - We use **Roborazzi** for snapshot testing. Ensure any UI changes update the Roborazzi snapshots if requested.
+
+## Version Control & Session Hygiene
+- **Every session MUST end with a proper commit AND push** to the remote (`Jami-Studio/main`). Do not stop at a local commit.
+- **Never leave dirty files** — the working tree must be clean at end of session (`git status` shows nothing to commit). Stage and commit all intended changes; do not abandon uncommitted work.
+- Never commit secrets — `.env`, `debug.keystore`, and `docs/internal/` are git-ignored; keep it that way. Verify no credentials are staged before committing.
+- Write clear, descriptive commit messages summarizing the change set.

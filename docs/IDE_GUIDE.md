@@ -1,4 +1,4 @@
-# Android Studio vs. VS Code for Entymalia
+# Android Studio vs. VS Code for Etymalia
 
 Because you are working on a native Android application built with Kotlin, Jetpack Compose, and Gradle, **Android Studio** (built on IntelliJ IDEA) is the officially supported and recommended IDE.
 
