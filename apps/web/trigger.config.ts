@@ -8,7 +8,7 @@ function requiredEnv(name: "SUPABASE_URL" | "SUPABASE_SERVICE_ROLE_KEY"): string
 }
 
 export default defineConfig({
-  project: "etymalia",
+  project: "proj_wcurzuyxcrbsvfaxoymh",
   dirs: ["./trigger"],
   runtime: "node",
   maxDuration: 300,
