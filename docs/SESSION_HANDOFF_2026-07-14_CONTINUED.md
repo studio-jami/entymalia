@@ -53,12 +53,10 @@ The final build includes `/workspace` alongside `/`, `/api/ai/smoke`, `/api/heal
 
 ## Still required for live smoke verification
 
-1. Deploy the current branch to the existing Vercel project.
-2. Configure production `ETYMALIA_STUDIO_USER_IDS` with the same server-only UUID already configured locally.
-3. Confirm that Vercel’s project Root Directory is `apps/web/`.
-4. Sign in at the deployed site as `james@jami.studio`, then request `GET /api/ai/smoke`.
+1. Set the existing Vercel project’s Root Directory from `web/` to `apps/web/` in the dashboard, then deploy the current branch.
+2. Sign in at the deployed site as `james@jami.studio`, then request `GET /api/ai/smoke`.
 
-The Vercel CLI is authenticated as `studio-jami` for the `jami-studio` team, but that scope currently reports no projects. No Vercel project settings were changed because the live project could not be identified from this authenticated scope without guessing.
+Vercel project `studio-jami/etymalia` is now linked locally and Production `ETYMALIA_STUDIO_USER_IDS` has been set as a sensitive variable. The Vercel CLI's project inspection confirms the remaining stale Root Directory is `web/`. Its API subcommand rejects valid endpoint paths in this installed CLI version, and the browser dashboard requires a separate Vercel login, so the root setting was deliberately not guessed or modified through an unsupported path.
 
 ## Scope guardrails retained
 
