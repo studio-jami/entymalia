@@ -1,5 +1,10 @@
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { config as loadEnv } from "dotenv";
 import { defineConfig } from "@trigger.dev/sdk/v3";
 import { syncEnvVars } from "@trigger.dev/build/extensions/core";
+
+loadEnv({ path: resolve(dirname(fileURLToPath(import.meta.url)), "../../.env") });
 
 function requiredEnv(name: "SUPABASE_URL" | "SUPABASE_SERVICE_ROLE_KEY"): string {
   const value = process.env[name]?.trim();
