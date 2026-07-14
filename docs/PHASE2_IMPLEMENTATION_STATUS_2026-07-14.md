@@ -20,7 +20,7 @@
 - Added the `generate-full-kit` Trigger.dev task. It accepts only workspace and brand IDs, reloads all brand data server-side with the Supabase service role, renders the social kit, uploads to the private `etymalia` bucket under the established workspace/brand path, and upserts corresponding `assets` metadata.
 - Added the brand-workspace action and UI control to enqueue that durable task only after an RLS-visible DTCG palette exists.
 - Added `apps/web/trigger.config.ts` with a five-minute job duration and three-attempt retry policy.
-- Added the official Trigger.dev CLI as a root development dependency.
+- Verified the official Trigger.dev CLI separately; it is intentionally not a repository dependency because it is a deployment tool, not application runtime code.
 
 ## Verification completed
 
@@ -51,8 +51,8 @@
 
 ## Required completion sequence
 
-1. Authenticate the intended Trigger.dev Cloud account (`pnpm exec trigger login`) and confirm its project reference.
-2. Deploy from `apps/web` using `trigger.config.ts`.
+1. Authenticate the intended Trigger.dev Cloud account (`pnpm dlx trigger.dev login`) and confirm its project reference.
+2. Deploy from `apps/web` using `pnpm dlx trigger.dev deploy apps/web --config trigger.config.ts`.
 3. Configure `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` as Trigger Cloud runtime secrets; do not put values in source control.
 4. Enqueue `generate-full-kit` from an authenticated production brand with a DTCG palette, then verify all 12 objects and `assets` rows through the live Supabase project.
 5. Decide whether Sentry and PostHog should be adopted. If so, provide/create the intended account projects and keys, then implement and validate their integrations. They cannot truthfully be marked settled while absent.
