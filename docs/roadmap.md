@@ -21,7 +21,7 @@ Etymalia is becoming a professional brand-identity platform. The web app is the 
 | Monorepo, Supabase workspace schema/RLS, Google AI adapters | Implemented in source. |
 | Vault-backed Google credential store | Implemented server-side only; no user-facing BYOK flow. |
 | Phase 1 web: names, palette, SVG identity, SVG favicon, ZIP export | Implemented; historical live verification exists but was not re-run in this audit. |
-| Phase 2 social renderer and Trigger task | Implemented in source; deployment/run completion is unverified in this audit. Assets are not yet surfaced or exported. |
+| Phase 2 social renderer and Trigger task | Implemented in source; deployment/run completion is unverified. Persisted social assets have RLS-scoped previews/downloads and are included in authenticated ZIP exports after generation. |
 | Android Compose / Room client | Implemented as a prototype; AI proxy authentication and hardening are release blockers. |
 | Phase 3 and Phase 4 product capabilities | Not implemented, except the Phase 4 membership schema/RLS foundation. |
 
@@ -41,7 +41,7 @@ Etymalia is becoming a professional brand-identity platform. The web app is the 
 2. Deploy/confirm `generate-full-kit` with scoped Supabase runtime credentials.
 3. Run a real job for an authenticated brand with valid DTCG tokens.
 4. Verify its terminal status, 12 private Storage files, and 12 `assets` rows.
-5. Add workspace gallery/listing and ZIP-export support for generated social assets.
+5. Confirm the workspace gallery/listing and ZIP-export path against the verified production output.
 
 ### Verification foundation
 

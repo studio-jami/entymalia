@@ -41,7 +41,7 @@ A July 14 handoff records live Supabase verification of this flow. This audit ve
 - `generate-full-kit` Trigger.dev task that loads a brand/tokens server-side, renders PNGs, writes private Storage objects, and upserts `assets` records.
 - UI action to queue the task only after a DTCG palette exists.
 
-The repository contains conflicting historical claims about whether the Trigger worker was deployed. The current code proves the task is configured; this audit could not authenticate the Trigger CLI or run the production job. Generated social assets are not yet displayed in the web UI or included in ZIP exports.
+The repository contains conflicting historical claims about whether the Trigger worker was deployed. The current code proves the task is configured; this audit could not obtain a CLI identity because the installed Trigger executable hangs before emitting output. Persisted social assets are now loaded through RLS, rendered with short-lived signed previews, individually downloadable, and included in authenticated ZIP exports once a job completes.
 
 ### Android application
 
@@ -64,7 +64,7 @@ The repository contains conflicting historical claims about whether the Trigger 
 1. Authenticate the intended Trigger.dev account and verify the configured project.
 2. Deploy or confirm the deployed `generate-full-kit` task with its two runtime Supabase secrets.
 3. Run an authenticated production job and verify completion plus exactly 12 Storage objects and matching `assets` rows.
-4. Surface generated assets in the workspace and include them in export packages.
+2. Confirm generated assets appear in the workspace and export package after the verified production job.
 5. Implement reference import and complete the Typst vs React-PDF guide-renderer evaluation.
 
 ### Quality work already visible in source
