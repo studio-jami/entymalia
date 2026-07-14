@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import WebSocket from "ws";
 import { task } from "@trigger.dev/sdk/v3";
 import { synthesizeIdentity } from "@etymalia/asset-forge";
 import { renderSocialKit } from "@etymalia/asset-forge/social";
@@ -10,10 +11,16 @@ interface FullKitPayload {
 }
 
 function adminClient() {
+  if (!globalThis.WebSocket) {
+    globalThis.WebSocket = WebSocket as unknown as typeof globalThis.WebSocket;
+  }
+
   const url = process.env.SUPABASE_URL?.trim();
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!url || !key) throw new Error("Supabase job credentials are not configured.");
-  return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
 
 function storagePrefix(workspaceId: string, brandId: string): string {
