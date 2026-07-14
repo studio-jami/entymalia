@@ -33,6 +33,11 @@ If you are an AI assistant or Agent (like GitHub Copilot, Gemini, or Claude) mod
 - UI Tests should use Compose UI Test framework in `app/src/androidTest/`.
 - We use **Roborazzi** for snapshot testing. Ensure any UI changes update the Roborazzi snapshots if requested.
 
+## Agent Execution Standard
+- **Do not offload routine investigation to the user.** When a command or integration is blocked, inspect local configuration, installed tooling, service APIs, logs, and documented alternatives; make multiple evidence-driven attempts before requesting user input.
+- **Initiate interactive authorization flows yourself.** Only ask the user to complete the unavoidable browser/account confirmation after the flow is active, then resume verification immediately.
+- **Do not mistake a first command failure for a hard blocker.** Diagnose the failure, pursue supported upstream paths, and document any truly external prerequisite precisely.
+
 ## Version Control & Session Hygiene
 - **Every session MUST end with a proper commit AND push** to the remote (`Jami-Studio/main`). Do not stop at a local commit.
 - **Never leave dirty files** — the working tree must be clean at end of session (`git status` shows nothing to commit). Stage and commit all intended changes; do not abandon uncommitted work.

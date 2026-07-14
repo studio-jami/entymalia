@@ -1,4 +1,11 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
+import { syncEnvVars } from "@trigger.dev/build/extensions/core";
+
+function requiredEnv(name: "SUPABASE_URL" | "SUPABASE_SERVICE_ROLE_KEY"): string {
+  const value = process.env[name]?.trim();
+  if (!value) throw new Error(`Missing ${name} for Trigger.dev deployment.`);
+  return value;
+}
 
 export default defineConfig({
   project: "etymalia",
@@ -7,4 +14,12 @@ export default defineConfig({
   maxDuration: 300,
   logLevel: "log",
   retries: { enabledInDev: false, default: { maxAttempts: 3 } },
+  build: {
+    extensions: [
+      syncEnvVars(async () => [
+        { name: "SUPABASE_URL", value: requiredEnv("SUPABASE_URL") },
+        { name: "SUPABASE_SERVICE_ROLE_KEY", value: requiredEnv("SUPABASE_SERVICE_ROLE_KEY") },
+      ]),
+    ],
+  },
 });
