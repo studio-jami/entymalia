@@ -2,7 +2,7 @@
 
 **Purpose:** Define the production contract for creation, rendering, export, and long-running work.
 
-This is an architecture contract, not a run log. The current runner is Trigger.dev; the contract must remain portable.
+This is an architecture contract, not a run log. Cloudflare Workflows + Queues are the selected durable-work control plane; Trigger.dev is the transitional implementation. The contract remains portable.
 
 ## Product principle
 
@@ -194,16 +194,16 @@ flowchart LR
 
 | Need | Best-fit direction | Why |
 | --- | --- | --- |
-| Current web-native workflows, moderate artifact jobs | Trigger.dev Cloud | Fastest path; code-first tasks, retry/observability, existing integration. |
-| Durable workflow with edge-native product surface and Cloudflare commitment | Cloudflare Workflows + Queues | Durable steps, retries, waits, lifecycle APIs; Queues offers buffering, batching, retries, DLQ, and pull consumers. |
-| High-cost CPU/GPU/media work, explicit queues, regional control, auditable orchestration | AWS Step Functions Standard + SQS + ECS/Fargate or AWS Batch | Standard workflows provide auditable execution history; SQS decouples work; Fargate/Batch is appropriate for native and long compute. |
-| GCP-native media/AI pipeline, Cloud Run and Vertex-first strategy | Google Workflows + Cloud Run Jobs/Services + Pub/Sub | Regional orchestration, long waits/polls, service connectors, and a natural fit for Vertex/GCP credits. |
+| Personal model generation | OpenAI OAuth and xAI/Grok OAuth | The provider account does the model/media work; Etymalia owns the creative workflow, artifacts, and experience. |
+| SaaS durable orchestration | Cloudflare Workflows + Queues | Selected control plane for durable steps, retries, waits, queueing, DLQ, and pull consumers. |
+| Heavyweight future compute | AWS Step Functions Standard + SQS + ECS/Fargate or AWS Batch | Designated future heavyweight lane; preserve current AWS capacity for the EC2/open-weight GPU workload. |
+| Vertex media | Vertex plus the appropriate GCP execution adapter | Preferred GCP media lane; do not assume Cloud Run credit eligibility until verified against the current account program. |
 
 **Locked decision:**
 
 1. **Cloudflare Workflows + Queues** are the primary durable-work control plane. Workflows own orchestration, state, retries, waits, and lifecycle; Queues provide buffering, retry, dead-letter, and pull-consumer capability.
 2. **Supabase remains the product system of record** for Auth, Postgres/RLS, private brand storage, job/asset/export ledgers, and signed delivery. Cloudflare does not create a second product database or storage truth.
-3. **AWS is reserved** for the established EC2/open-weight GPU lane and future workloads that genuinely require AWS-specific heavy compute. It is not the default brand-kit runner while that runway is constrained.
+3. **AWS is the designated heavyweight compute lane.** Current AWS capacity is protected for the established EC2/open-weight GPU workload; when production media needs grow, AWS services such as Step Functions, SQS, Fargate/Batch, or MediaConvert are the planned expansion path.
 4. **GCP is reserved** for Vertex media generation. Treat Cloud Run or other GCP-credit eligibility as unconfirmed until verified against the account's current program terms; do not budget product compute on an assumed credit entitlement.
 5. Trigger remains deployed only as a transitional reference until Cloudflare-backed full-kit execution is production-proven, then it leaves the application request path.
 6. Keep the request, job, asset, and export contracts unchanged so a runner migration changes adapters, not product behavior.

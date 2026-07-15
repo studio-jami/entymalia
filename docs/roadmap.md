@@ -12,7 +12,7 @@ Etymalia is a web-first professional brand-identity platform. The Android applic
 - Every AI request is authenticated, authorized, validated, rate/usage limited, observable, and attributable.
 - Brand tokens are the source of truth; all rendered deliverables derive deterministically from them.
 - Long-running media work is durable, idempotent, observable, and reflected in both the UI and the export package.
-- Cloudflare Workflows + Queues are the primary durable-work control plane. AWS remains reserved for the existing EC2/open-weight GPU lane; GCP remains reserved for Vertex media generation unless current account terms explicitly confirm another eligible use of its credits.
+- OpenAI OAuth and xAI/Grok OAuth are the first personal-generation integrations. Cloudflare Workflows + Queues are the primary SaaS durable-work control plane around them. AWS is the designated future heavyweight compute lane while its existing EC2/open-weight GPU capacity is protected; GCP remains the Vertex media lane unless current account terms explicitly confirm another eligible use of its credits.
 - Guided build accelerates users without constraining them: every stage must also support direct editing, selective generation, comparison, and individual or collection export.
 - Claims of deployment, availability, and vendor support are evidence-bound—not inferred from source configuration.
 

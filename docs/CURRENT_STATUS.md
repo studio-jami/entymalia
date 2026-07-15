@@ -21,6 +21,10 @@ Etymalia is a web-first brand-identity platform built with Next.js, Supabase, Tr
 - Workspace support for viewing and downloading persisted generated assets through short-lived signed URLs.
 - Shared package tests for AI contracts, name generation, availability, tokens, identity generation, rasterization, favicons, social rendering, and ZIP packaging.
 
+### Next personal generation lane
+
+OpenAI OAuth and xAI/Grok OAuth are the first provider integrations to implement. They are for the personal-generation experience: the provider account does the model/media work, while Etymalia handles creative controls, durable lifecycle, artifacts, comparison, and export. Cloudflare is the SaaS orchestration layer around those provider calls, not a replacement for them.
+
 ### Generated full kit
 
 The deployed `generate-full-kit` task generates and persists:

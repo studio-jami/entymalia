@@ -85,7 +85,7 @@ We are explicitly benchmarking against the best payment-gated products in this s
  └──────────────────┘        └────────────────────────┘
 ```
 
-**Deployment direction:** Vercel (web + server routes) · Supabase (Postgres, Auth, Storage, Vault) · a durable runner adapter for background work. Trigger.dev is the current implementation; dedicated AWS, Google Cloud, or Cloudflare compute remains an intentional option for high-cost media. See [`GENERATION_SYSTEM.md`](../GENERATION_SYSTEM.md).
+**Deployment direction:** Vercel (web + server routes) · Supabase (Postgres, Auth, Storage, Vault) · Cloudflare Workflows + Queues (durable SaaS orchestration) · provider OAuth for the personal-generation lane. Trigger.dev is transitional. AWS is the designated future heavyweight compute lane while its current EC2/open-weight GPU capacity is protected; GCP is the Vertex media lane. See [`GENERATION_SYSTEM.md`](../GENERATION_SYSTEM.md).
 
 ---
 
@@ -107,21 +107,23 @@ We are explicitly benchmarking against the best payment-gated products in this s
 
 Provider (which model vendor) and **credential source** (whose account pays) are **orthogonal**. The AI port resolves them separately: feature code asks for a logical model; a **credential resolver** decides which key/account fulfills it.
 
-### Credential modes (proposed; validate before implementation)
-| Mode | Intended approach | Current state |
-|------|-------------------|---------------|
-| **OAuth-linked account** | Use only a documented provider OAuth program with explicit third-party API entitlement, PKCE, token storage/rotation, revocation, and terms approval. | Not implemented; do not infer API rights from consumer chat subscriptions or OIDC discovery. |
-| **BYOK API key** | Store user key material in Supabase Vault and decrypt only in server runtime. | Google storage/resolution infrastructure exists; no user-facing configuration or execution flow exists. |
-| **Pooled / managed** | Server-held provider credentials with explicit entitlements, spend limits, and metering. | Studio smoke infrastructure exists for Google; managed production offering is not implemented. |
+### Locked provider lanes
 
-Any future OpenAI, xAI, fal, Gateway, or Google OAuth implementation must be based on current official provider documentation and an explicit entitlement/terms review at the time of implementation. OAuth discovery alone is not evidence that a third-party product may use a token for API inference.
+| Lane | Direction | Role |
+|------|-----------|------|
+| **Personal generation** | **OpenAI OAuth and xAI/Grok OAuth are the first generation integrations to ship.** | The authenticated provider account performs text, image, video, or other model work available to that account. Etymalia supplies the creative product, durable request state, artifacts, and UX. |
+| **Vertex media** | Google/Vertex remains the preferred GCP media pool. | Use where the selected Vertex capability and available credits are the right fit. |
+| **SaaS orchestration** | Cloudflare Workflows + Queues. | Runs request lifecycle, retries, state, artifact delivery, and SaaS control-plane work; it is not the source of provider intelligence. |
+| **Managed / BYOK product lanes** | Later. | The Vault infrastructure may support these after the personal OAuth experience is solid. |
 
-### Current credential and execution boundary
+OAuth is a locked product direction, not an open decision. Implementation must use the provider's current official OAuth/API program, app registration, scopes, token rotation/revocation, and entitlement terms at implementation time. The necessary verification is an integration prerequisite—not a reason to demote the direction.
 
-- **Google AI Studio and Vertex** are the only implemented provider adapters.
-- The internal Studio lane uses server-held credentials; the user production BYOK lane has Vault infrastructure but no user-facing configuration or execution flow yet.
-- OpenAI, xAI, fal, OAuth-linked provider accounts, managed charge-through, and Vercel AI Gateway are future adapter decisions—not current product capabilities.
-- Provider and credential choices remain orthogonal: feature code requests a logical capability; a server-only resolver selects an approved provider and credential source.
+### Current implementation boundary
+
+- **Google AI Studio and Vertex** are the only provider adapters in source today.
+- OpenAI OAuth and xAI/Grok OAuth are the first provider adapters to implement next for the personal-generation lane.
+- Cloudflare orchestrates work around provider calls; it does not replace the provider or consume the personal OAuth lane.
+- Provider, credential source, job runner, and storage are separate adapters so any one can evolve without rewriting the product.
 
 ---
 

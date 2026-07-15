@@ -20,8 +20,9 @@ This is one coherent foundation package—not a collection of disconnected featu
 | Durable control plane | Cloudflare Workflows + Queues. |
 | Product data and delivery | Supabase Auth, Postgres/RLS, private Storage, job/asset/export ledgers, and signed URLs remain authoritative. |
 | Trigger.dev | Transitional implementation only. Do not add product features to it. Retire it from the application request path only after Cloudflare production verification succeeds. |
-| AWS | Reserve for the existing EC2/open-weight GPU lane and future AWS-specific heavy compute. |
-| GCP | Reserve for Vertex media generation. Do not assume Cloud Run credit eligibility without current account-program confirmation. |
+| Personal generation | OpenAI OAuth and xAI/Grok OAuth are the first provider integrations. Providers perform model/media work; Cloudflare orchestrates the SaaS lifecycle around it. |
+| AWS | Designated future heavyweight compute lane. Protect the existing EC2/open-weight GPU capacity now; extend into AWS heavy services when the product workload requires it. |
+| GCP | Vertex media lane. Do not assume Cloud Run credit eligibility without current account-program confirmation. |
 | Payloads | IDs, version references, bounded options, and idempotency keys only—never media bytes or secrets. |
 | Docker | Do not use local Docker as a development or verification dependency. |
 
@@ -44,9 +45,9 @@ Cloudflare controls delivery and durable execution. Supabase controls product tr
 
 ## Work package
 
-### A. Establish the runner adapter
+### A. Establish the provider and runner adapters
 
-Create a small runner port in the web application. It must support:
+Create small provider and runner ports in the web application. The provider port must make OpenAI OAuth and xAI/Grok OAuth the first personal-generation adapters; the runner port must support:
 
 - enqueueing a typed generation request;
 - idempotency by request and artifact identity;
