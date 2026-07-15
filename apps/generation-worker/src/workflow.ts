@@ -34,7 +34,11 @@ export class FullKitWorkflow extends WorkflowEntrypoint<Env, GenerationQueueMess
         }),
       });
       if (!response.ok) throw new Error(`Renderer request failed with status ${response.status}`);
-      return await response.json() as { count: number; skipped: boolean };
+      const payload = await response.json() as { count?: unknown; skipped?: unknown };
+      if (typeof payload.count !== "number" || typeof payload.skipped !== "boolean") {
+        throw new Error("Renderer returned an invalid completion result");
+      }
+      return { count: payload.count, skipped: payload.skipped };
     });
 
     return { ...accepted, result };
