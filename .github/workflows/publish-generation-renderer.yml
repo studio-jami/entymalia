@@ -8,6 +8,7 @@ on:
       - apps/generation-worker/container/**
       - apps/generation-worker/package.json
       - pnpm-lock.yaml
+      - .npmrc
       - .github/workflows/publish-generation-renderer.yml
 
 permissions:
@@ -38,4 +39,4 @@ jobs:
       - name: Build and push Cloudflare Container image
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: pnpm --filter etymalia-generation-worker exec wrangler containers build ./container --tag etymalia-generation-renderer:staging-v3 --push
+        run: pnpm --filter etymalia-generation-worker exec wrangler containers build ./container --tag etymalia-generation-renderer:staging-v4 --push
