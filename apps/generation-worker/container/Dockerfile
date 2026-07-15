@@ -7,4 +7,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 USER node
-CMD ["node", "--import", "tsx", "server.ts"]
+CMD ["node", "--import", "tsx", "container/server.ts"]
