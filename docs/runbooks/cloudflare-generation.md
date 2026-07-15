@@ -10,6 +10,9 @@ The isolated staging control-plane foundation is deployed. It does **not** proce
 - Dead-letter queue: `etymalia-generation-staging-dlq`
 - Workflow: `etymalia-full-kit-staging`
 - First harmless Workflow instance: `-0803cbbe58d1de5c616e45185c7b61f4b7651d6f0dcae00523cf37f1e3348fb4` — completed successfully on 2026-07-15
+- Staging renderer image: `registry.cloudflare.com/c294df364db8742bc02db57c046043ef/etymalia-generation-renderer:staging`, published by GitHub Actions run `29456382123`
+- Container-enabled staging Worker version: `706c226c-0da3-4659-9e79-a4b5a634f2f0`; its private Container application ID is `a035fc52-7688-4558-814c-ccb93ea16e6b`
+- Private Container health proof: Workflow instance `be279998-458c-4cf0-b01a-a05ceab047fe` completed on 2026-07-15. Its `verify renderer health` step started the Container through its Durable Object binding and received `{"service":"etymalia-generation-renderer","status":"ok"}`. No Supabase credential or product data was involved.
 
 Production configuration names are committed but production resources must not be deployed until the delivery plan's Cloudflare adapter and verification work is complete.
 
