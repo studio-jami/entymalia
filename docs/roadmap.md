@@ -1,78 +1,217 @@
-# Etymalia Roadmap
+# Etymalia Delivery Roadmap
 
-**Audited baseline:** July 14, 2026
+**Purpose:** The executable delivery plan for the web product.
 
-**Current source of truth:** [`CURRENT_STATUS.md`](./CURRENT_STATUS.md)
+**Current truth:** [`CURRENT_STATUS.md`](./CURRENT_STATUS.md)
 
-Etymalia is a web-first professional brand-identity platform. The Android application is a legacy prototype and is intentionally outside this roadmap.
+**System contract:** [`GENERATION_SYSTEM.md`](./GENERATION_SYSTEM.md)
 
-## Non-negotiable end shape
+**Active handoff:** [`HANDOFF.md`](./HANDOFF.md)
 
-- AI credentials never reach a browser or Android APK.
-- Every AI request is authenticated, authorized, validated, rate/usage limited, observable, and attributable.
-- Brand tokens are the source of truth; all rendered deliverables derive deterministically from them.
-- Long-running media work is durable, idempotent, observable, and reflected in both the UI and the export package.
-- OpenAI OAuth and xAI/Grok OAuth are the first personal-generation integrations. Cloudflare Workflows + Queues are the primary SaaS durable-work control plane around them. AWS is the designated future heavyweight compute lane while its existing EC2/open-weight GPU capacity is protected; GCP remains the Vertex media lane unless current account terms explicitly confirm another eligible use of its credits.
-- Guided build accelerates users without constraining them: every stage must also support direct editing, selective generation, comparison, and individual or collection export.
-- Claims of deployment, availability, and vendor support are evidence-bound—not inferred from source configuration.
+## Locked operating model
 
-## Current baseline
-
-| Area | Status |
+| Concern | Decision |
 | --- | --- |
-| Monorepo, Supabase workspace schema/RLS, Google AI adapters | Implemented in source. |
-| Vault-backed Google credential store | Implemented server-side only; no user-facing BYOK flow. |
-| Phase 1 web: names, palette, SVG identity, SVG favicon, ZIP export | Implemented; historical live verification exists but was not re-run in this audit. |
-| Phase 2 social renderer and Trigger task | Trigger Cloud production version `20260714.7` is deployed; the durable task now emits social, identity, and favicon artifacts with RLS-scoped lifecycle records. A post-deployment successful task run still needs artifact-count verification. Persisted assets have previews/downloads and authenticated ZIP export support. |
-| Android Compose / Room client | Legacy prototype; outside the web product roadmap. |
-| Phase 3 and Phase 4 product capabilities | Not implemented, except the Phase 4 membership schema/RLS foundation. |
+| Product UX | Guided build and direct creative control share one brand state. A user can generate one asset, a named collection, a custom selection, or a complete kit at every relevant stage. |
+| Personal generation | OpenAI OAuth and xAI/Grok OAuth are the first provider integrations. Provider accounts perform available model/media work; Etymalia owns creative controls, durable state, artifacts, and export. |
+| SaaS durable work | Cloudflare Workflows + Queues. Workflows orchestrate; Queues buffer, retry, and route work. |
+| Product truth | Supabase Auth, Postgres/RLS, private Storage, job ledger, asset ledger, and export ledger. |
+| Current runner | Trigger.dev is transitional. Do not add feature work to it. |
+| AWS | Preferred heavyweight compute platform. Current AWS runway is reserved for the EC2/open-weight GPU workload. |
+| GCP | Vertex media lane. Cloud Run credit eligibility is unconfirmed and must not be assumed. |
+| Local infrastructure | No local Docker dependency. |
 
-## 0. Release integrity — do first
+## Milestone 0 — Cloudflare preflight and repository foundation
 
-See [`GENERATION_SYSTEM.md`](./GENERATION_SYSTEM.md) for the portable request/job/asset/export contracts and runner decision criteria.
+**Goal:** establish the real Cloudflare account/project boundary before application code depends on it.
 
-### Web delivery proof
+### Deliver
 
-1. Implement the Cloudflare Workflows + Queues runner adapter and migrate the full-kit path onto it.
-2. Verify one completed Cloudflare-backed full-kit run has a terminal job record, expected private artifacts, matching `assets` records, workspace previews/downloads, and ZIP contents.
-3. Retire Trigger from the application request path after the Cloudflare path is production-proven.
+- A dedicated Cloudflare worker package using `wrangler.jsonc`, with staging and production environments.
+- Version-controlled bindings for one Workflow and the queue topology needed for the first full-kit workload.
+- Generated Worker binding types committed or verified in CI.
+- Worker test configuration using the Cloudflare Vitest pool.
+- A secret-management procedure that never writes Supabase service credentials into source, `wrangler.jsonc`, logs, queue messages, or command-line arguments.
+- A short operational runbook: deploy, dry-run, tail logs, inspect Workflow instances, inspect queue state, and replay dead-letter work.
 
-### Verification foundation
+### Verify
 
+- `wrangler whoami` identifies the intended account.
+- `wrangler deploy --dry-run` validates the worker configuration.
+- `wrangler types --check` passes.
+- Worker unit tests run without a live Cloudflare resource.
+- Staging deployment creates the intended Workflow/Queue bindings without changing Supabase product data.
 
-- Add web unit/integration tests for the deterministic engines, server actions, export route, and Trigger task boundaries.
-- Select monitoring and analytics vendors before adding integrations; do not claim Sentry or PostHog coverage while neither is configured.
+### Do not proceed until
 
-## 1. Web Phase 2 — complete the full kit
+- The Cloudflare account/project and environment names are confirmed.
+- The secret boundary is reviewed.
+- Staging can receive a harmless test request and report durable state.
 
-- Reference import with explicit MIME/size limits, private Storage paths, deletion, and palette/vibe extraction—plus manual application of extracted suggestions.
-- Selective and collection generation controls for identity, favicons, social assets, and exports; complete-kit generation remains a convenience composition.
-- Real raster derivatives: PNG/ICO and a standards-complete favicon package.
-- Prototype the brand guide in Typst and React-PDF, assess output/operations/accessibility, and record one chosen renderer.
-- Include social assets, guide, and raster identity derivatives in the export manifest and ZIP.
+## Milestone 1 — Portable generation request and runner ports
 
-## 2. Etymaria name engine
+**Goal:** separate product behavior from Trigger and provider SDKs.
 
-- Maintain the current 270-entry curated corpus with named ownership, licensing/provenance, review standards, and versioned releases.
-- Add CMUdict pronounceability and optional server-side AI polish only with structured, validated outputs.
-- Add Postgres + pgvector semantic retrieval only after the extension, schema, embeddings, RLS behavior, and refresh process are implemented and tested.
-- Keep RDAP as the first availability signal; add social/SEO signals only after provider and terms-of-service review.
+### Deliver
 
-## 3. Web Phase 3 — deliverable depth and monetization
+- A typed `GenerationRequest` model: workspace, brand, selected assets, input versions, priority, and idempotency key.
+- A runner port with Cloudflare and transitional Trigger adapters.
+- A provider port with logical capabilities rather than vendor/model strings in feature code.
+- Database migrations that extend the existing job ledger with runner, request, priority, artifact-selection, terminal-state, and cancellation/supersession fields as required.
+- Server-side authorization for every request against workspace role and future entitlement boundary.
+- Tests for idempotency, malformed selections, role denial, state transitions, and safe error mapping.
 
-- Email signature, digital business card/QR/vCard, letterhead, and templates gallery.
-- Product-ready BYOK setup/execution, secure deletion/rotation, and entitlement-aware UX.
-- Stripe Billing only once plans, limits, tax/merchant responsibilities, webhook lifecycle, and managed-credit economics are defined.
-- Registrar buy-through/affiliate integration only after selecting a compliant partner.
+### Verify
 
-## 4. Web Phase 4 — collaboration and scale
+- Existing full-kit action calls the runner port, not `@trigger.dev/sdk` directly.
+- The same request fixture runs against a fake runner in tests.
+- A request cannot contain media bytes, private credentials, arbitrary provider/model names, or an asset outside the caller’s brand.
+- Job records are queryable by workspace members and unwritable by browser clients.
 
-- Member invitations, membership/role management, and audit trail on the existing workspace schema.
-- Brand-audit feedback loop, premium templates, and documented public export API.
-- Capacity, cost, privacy, retention, incident response, and observability runbooks before scaling user media workloads.
+### Do not proceed until
 
+- Product code has one runner entry point.
+- Trigger is isolated behind its adapter.
 
+## Milestone 2 — Personal OAuth generation lane
 
-## Planned tooling versus implementation
+**Goal:** make OpenAI OAuth and xAI/Grok OAuth the first live personal-generation integrations.
 
-The master plan lists potential tools such as Vercel AI Gateway, OpenAI/xAI/fal providers, Style Dictionary, Uppy, Typst, React-PDF, Stripe, MJML, QR tooling, and vectorization libraries. None is a current implementation merely because it appears in that plan. Add a dependency and verified code path before promoting a proposal to the implemented architecture.
+### Deliver
+
+- Provider-specific OAuth adapters behind the provider port.
+- Server-side authorization-code + PKCE flow using the provider’s current official application-registration requirements.
+- Encrypted server-side token persistence, refresh, revocation, disconnect, and safe connection-state UI.
+- Logical capability mapping for text, image, and video only where the authenticated provider account actually supports that capability.
+- A personal-generation settings surface that shows connection state and never displays token material.
+- Structured output validation and safe provider-error mapping.
+
+### Verify
+
+- A user can connect and disconnect each provider without tokens entering browser storage, logs, database rows outside protected storage, or exports.
+- A disconnected provider cannot be invoked.
+- Expired/revoked access produces a reconnect state, not a generic job failure.
+- A connected provider can execute one bounded text-generation capability end-to-end before image/video capability is enabled.
+
+### Do not proceed to media until
+
+- Provider OAuth/API terms, scopes, and account entitlements are confirmed for the selected capability.
+- Rate, concurrency, and cancellation behavior are implemented and tested.
+
+## Milestone 3 — Cloudflare-backed selective generation
+
+**Goal:** replace the full-kit-only interaction with direct, selective, durable generation.
+
+### Deliver
+
+- Cloudflare Queue producer from the runner adapter.
+- Cloudflare Workflow that reloads versioned Supabase inputs and updates the existing job ledger.
+- Independently retryable artifact steps for identity, favicon, and social collections.
+- Priority routing for interactive single assets, standard collections, and background complete kits.
+- Workspace job panel: queued/running/completed/failed, completed count, safe failure summary, retry eligibility, and cancellation where supported.
+- Direct controls for one asset, identity collection, favicon collection, social collection, custom selection, and complete kit.
+
+### Verify
+
+- An authenticated production user can generate one asset, a selected collection, and a complete kit through Cloudflare.
+- Successful sibling artifacts remain ready when another artifact fails.
+- Every ready artifact has a private Storage object, matching `assets` record, lineage metadata, and short-lived authorized preview/download URL.
+- A non-member cannot access jobs, assets, exports, or Storage objects.
+- Queue retries and dead-letter handling are observable and replayable.
+
+### Trigger retirement condition
+
+Only after this milestone passes in production:
+
+1. remove Trigger from application enqueue paths;
+2. preserve historical Trigger records and artifacts;
+3. revoke Trigger runtime credentials after confirming no active run depends on them; and
+4. remove Trigger configuration/dependencies in one clean change.
+
+## Milestone 4 — Reference import and creative direction
+
+**Goal:** bring human visual direction into the shared brand state without automation overwriting taste.
+
+### Deliver
+
+- Image-only reference upload first, with explicit MIME, byte, count, and pixel limits.
+- Private Storage path, `brand_references` record, signed preview, deletion, and retention behavior.
+- Cloudflare-backed extraction job state.
+- Palette and visual-direction suggestions as reviewable outputs.
+- Explicit user actions to apply, ignore, compare, or retain suggestions; no silent token overwrite.
+
+### Verify
+
+- Invalid files are rejected before storage.
+- Upload/delete updates Storage and `brand_references` atomically from the user’s perspective.
+- Extraction result is linked to the exact reference and version.
+- Applying a suggestion creates a new token/version lineage and does not destroy the previous brand direction.
+
+## Milestone 5 — Guide and export completion
+
+**Goal:** make every persisted artifact deliverable through individual, collection, custom, and complete-kit exports.
+
+### Deliver
+
+- Equivalent Typst and React-PDF guide prototypes based on the same document model and selected assets.
+- A documented renderer decision using visual quality, deployment compatibility, performance, accessibility, and maintainability criteria.
+- Guide PDF as a persisted asset with version lineage.
+- Export selector for individual assets, named collections, custom selections, and complete kit.
+- Manifest that lists exact included artifact IDs, paths, versions, and generator metadata.
+
+### Verify
+
+- Export contents match the selected ledger assets exactly.
+- Private source artifacts cannot be downloaded by a non-member through an export URL.
+- Regenerating an artifact does not silently change an existing export.
+
+## Milestone 6 — Commercial and collaborative product
+
+**Goal:** add product depth only after the request/job/asset/export system is production-proven.
+
+### Deliver in this order
+
+1. Google BYOK user settings and execution path, using the established credential boundary.
+2. Email signature, card/QR/vCard, letterhead, and template system as persisted assets.
+3. Workspace invitations, membership roles, and audit events.
+4. Entitlement model enforced in server actions, runners, and exports.
+5. Stripe only after plans, limits, merchant/tax responsibilities, webhook lifecycle, and managed-credit policy are defined.
+6. Public export API only after the internal export contract is stable and audited.
+
+### Verify
+
+- Entitlements are enforced server-side, not only hidden in UI.
+- Invitations, role changes, API credentials, billing events, and export access are auditable.
+- Every paid or provider-funded action has a workspace-level limit and observable usage record.
+
+## Milestone 7 — Heavy media and scale
+
+**Goal:** use the strongest platform for work that Cloudflare should not own.
+
+### Direction
+
+- Keep personal provider OAuth for provider-hosted generation.
+- Keep Cloudflare for SaaS orchestration and queueing.
+- Use AWS when the workload requires heavyweight compute beyond the protected current EC2 GPU lane.
+- Use Vertex for selected GCP media capabilities.
+
+### Entry criteria
+
+- A specific workload exists: video transcode, large vectorization, large document extraction, batch media rendering, or equivalent.
+- Inputs, output format, latency target, cost budget, cancellation behavior, data residency, and expected volume are documented.
+- The workload cannot meet the Cloudflare worker/workflow capability and cost envelope.
+
+### Verify
+
+- The heavy-compute adapter still honors the same generation request, job, asset, and export contracts.
+- No raw media moves through browser requests or queue payloads.
+- Cost, concurrency, failure recovery, and cancellation are observable before release.
+
+## Official implementation references
+
+- [Cloudflare Workflows](https://developers.cloudflare.com/workflows/)
+- [Cloudflare Queues](https://developers.cloudflare.com/queues/)
+- [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
+- [Trigger.dev](https://trigger.dev/docs/introduction)
+- [AWS Step Functions](https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html)
+- [Google Cloud Workflows](https://cloud.google.com/workflows/docs/overview)
