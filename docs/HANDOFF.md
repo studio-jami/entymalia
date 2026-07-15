@@ -1,71 +1,150 @@
-# Etymalia — Session Handoff & Phase 0 Kickoff
+# Handoff — Cloudflare Generation Foundation
 
-> **Historical record (July 2026):** This initial kickoff contains superseded Phase 0 tasks and stale credential notes. Use [`CURRENT_STATUS.md`](./CURRENT_STATUS.md) and [`roadmap.md`](./roadmap.md) for active work.
+**Read first:** [`CURRENT_STATUS.md`](./CURRENT_STATUS.md), [`GENERATION_SYSTEM.md`](./GENERATION_SYSTEM.md), and [`roadmap.md`](./roadmap.md).
 
-*Prepared July 2026. Public-safe (no secrets). Secrets live in git-ignored `.env`; internal notes in git-ignored `docs/internal/`.*
+## Mission
 
----
+Build the production generation foundation for the web product:
 
-## 📋 Paste-this Kickoff Prompt (for a fresh session)
+1. migrate durable orchestration from transitional Trigger.dev tasks to **Cloudflare Workflows + Queues**;
+2. preserve Supabase as the sole product system of record; and
+3. complete the direct/selective generation experience around the same request, job, asset, and export contracts.
 
-> We're starting **Phase 0** of the Etymalia web platform. Read these first, in order:
-> 1. `AGENTS.md` (hard constraints)
-> 2. `docs/research/webapp_master_plan.md` (the canonical plan — esp. §5, §5.1, §7, §10, §16)
-> 3. `docs/research/ai-credential-resolver.sketch.ts` (the AI credential design to promote to real code)
-> 4. `docs/roadmap.md` (track/phase view)
->
-> **Goal of Phase 0 (Foundations):** stand up the monorepo and the AI + data spine so feature work can begin. Deliver, in order:
-1. ✅ **Turborepo + pnpm workspaces**: migrated the existing Next.js 15 app to `apps/web`; created package skeletons for `@etymalia/{ai,tokens,name-engine,availability,asset-forge,exporters}`.
-2. ✅ **`@etymalia/ai` (Google/Vertex slice):** implemented a cached live provider-model catalog sourced from the Gemini and Vertex model-list APIs, Google API-key/Vertex-service-account credential contracts, `CredentialResolver`, `buildProvider()`, `AiPort`, and Zod schemas. No model ID is maintained in source. The Vercel AI SDK is the abstraction; concrete initial providers are Google AI Studio and Vertex. OpenAI/xAI OAuth resolution remains deliberately deferred.
-3. ✅ **Studio `CredentialStore`:** `apps/web/lib/ai/studio-credential-store.ts` reads only the server-side Gemini key and Vertex service-account path at runtime. Prod-lane (Supabase Vault) remains the next credential-store task.
-4. ✅ **Data model + RLS**: added `20260714110000_add_workspace_brand_schema.sql` for `workspaces / memberships / brands / brand_tokens / name_candidates / brand_references / assets / exports`, membership RLS, and scoped Storage policies. **New migration file — never edit applied ones.**
-5. **Smoke test (implemented, pending live invocation):** `GET /api/ai/smoke` calls `brand:fast-text` through the Studio lane and returns structured JSON. It requires an authenticated user ID included in server-only `ETYMALIA_STUDIO_USER_IDS`; configure that allowlist before the live Google verification. OpenAI/xAI remain out of scope until their ordered provider phase.
-6. Generate `apps/web/.env.local` from root `.env` for local dev.
->
-> Respect all constraints in `AGENTS.md`. Ask me before introducing any new paid dependency. Work in small, verifiable steps.
+This is one coherent foundation package—not a collection of disconnected feature patches.
 
----
+## Locked decisions
 
-## 🧭 Where we are (state at handoff)
+| Decision | Direction |
+| --- | --- |
+| Product interaction | Guided build is an accelerator; direct editing, selective generation, comparison, and individual/collection export are equal first-class paths. |
+| Durable control plane | Cloudflare Workflows + Queues. |
+| Product data and delivery | Supabase Auth, Postgres/RLS, private Storage, job/asset/export ledgers, and signed URLs remain authoritative. |
+| Trigger.dev | Transitional implementation only. Do not add product features to it. Retire it from the application request path only after Cloudflare production verification succeeds. |
+| AWS | Reserve for the existing EC2/open-weight GPU lane and future AWS-specific heavy compute. |
+| GCP | Reserve for Vertex media generation. Do not assume Cloud Run credit eligibility without current account-program confirmation. |
+| Payloads | IDs, version references, bounded options, and idempotency keys only—never media bytes or secrets. |
+| Docker | Do not use local Docker as a development or verification dependency. |
 
-**Product:** Etymalia — a professional-grade, payment-gated **brand generator** (web + existing Android app), whose signature is the resurrected **Etymaria** etymology-driven name engine. Web home: `etymalia.jami.studio` (Next.js + Supabase on Vercel).
+## Target architecture
 
-**Done this session:**
-- ✅ **Google OAuth sign-in fixed** (web) — root cause was the Android client sitting in Supabase's primary Google Client ID slot; corrected via Management API. Web sign-in works.
-- ✅ **Canonical rename** `Entymalia → Etymalia` across the whole repo (43 files + Android package dirs + `applicationId studio.jami.etymalia`). Storage bucket is `etymalia`.
-- ✅ **Docs aligned & de-staled** — removed Firebase/Hilt/Compose-Multiplatform; `roadmap.md`, `WEB_APP.md`, `AUDIT.md`, `README.md` now reflect reality.
-- ✅ **Master plan written** — `docs/research/webapp_master_plan.md` (architecture, OSS tooling per capability, two lanes, phasing, decisions log).
-- ✅ **AI credential design** — three-mode resolver (OAuth / API key / Vertex SA), two lanes (Studio internal vs Prod users), sketched in `ai-credential-resolver.sketch.ts`.
-- ✅ **Provider OAuth verified live** — OpenAI (`auth.openai.com`) and xAI (`auth.x.ai`, scope `api:access`) both run public-client PKCE OAuth; subscription-backed OAuth-to-API is real.
-- ✅ **Credentials loaded** — Google (Vertex SA + AI Studio key) + OpenAI & xAI OAuth refresh tokens adopted from `~/.codex` and `~/.grok` into `.env`.
+```mermaid
+flowchart LR
+  A[Next.js application] --> B[Authenticated generation API]
+  B --> C[Supabase request and job ledger]
+  C --> D[Cloudflare Queue]
+  D --> E[Cloudflare Workflow]
+  E --> F[Step workers or dedicated compute adapter]
+  F --> G[Supabase private Storage]
+  G --> H[Supabase asset and export ledger]
+  H --> I[Realtime or pollable workspace state]
+  I --> J[Individual, collection, and complete-kit export]
+```
 
-**In progress:** Phase 0. The pnpm/Turborepo monorepo, shared package skeletons, global web token foundation, and additive workspace/brand migration are complete. Next is the real `@etymalia/ai` provider/credential port, followed by workspace bootstrap and brand-library data binding.
+Cloudflare controls delivery and durable execution. Supabase controls product truth. No second product database, no duplicate asset ledger, and no runner-specific product behavior.
 
----
+## Work package
 
-## 🔒 Hard constraints (from `AGENTS.md` + decisions)
-- **Backend = Supabase** (Auth/Postgres/Storage/Edge/Vault). **No Firebase.**
-- **Web = Next.js 15 + React 19 on Vercel.** Not Compose Multiplatform.
-- **Android = Jetpack Compose + Material 3**, manual DI (**no Hilt/Dagger**).
-- **AI never client-side.** Provider-direct `@ai-sdk/*` by default; **Vercel AI Gateway optional, not target**.
-- **AI credentials:** Google = API key (AI Studio Pro + Vertex SA); **OpenAI + xAI = OAuth only** (no API-key lane; in-app OAuth, no proxy).
-- **Two lanes:** Studio (our pooled creds) vs Prod (user BYOK/charge-through). Same port, different resolver. Need not be feature-equal.
-- **Jobs = Trigger.dev**, start on Cloud (dev key present), self-host later if justified. Pass storage refs in payloads, not blobs.
-- **Etymaria corpus** → Postgres + pgvector; re-export the source CSV to clean UTF-8 first (Greek/diacritics are mangled). Seed: `docs/references/etymology_brand_table…` (281 rows, cross-linguistic). This curation is the moat.
-- **Reuse > handroll** — every capability maps to an OSS lib (see master plan §15).
+### A. Establish the runner adapter
 
----
+Create a small runner port in the web application. It must support:
 
-## 🔑 Credentials & tooling status
-- **Loaded in `.env`:** Supabase (full), `GOOGLE_SA_JSON_KEY_PATH` (Vertex), `GEMINI_API_KEY` (AI Studio Pro), `GOOGLE_WEB/ANDROID_CLIENT_*`, `XAI_OAUTH_*`, `OPENAI_OAUTH_*` (+ `OPENAI_OAUTH_ACCOUNT_ID`), `TRIGGER_SECRET_KEY` (Cloud dev), Vercel/GitHub.
-- **`.env` is git-ignored**; `.env.example` documents the shape. Internal account map: `docs/internal/PROVIDER_ACCOUNTS.md` (git-ignored).
-- **Tooling present:** Node v22, pnpm 10, npm, git. **Docker missing** (only needed if self-hosting Trigger.dev — not now).
-- **Caveat:** OpenAI/xAI refresh tokens are *shared with the Codex/Grok CLIs* and rotate on use. Fine for dev; register Etymalia's own OAuth clients for production.
+- enqueueing a typed generation request;
+- idempotency by request and artifact identity;
+- reporting lifecycle updates to `generation_jobs`;
+- cancellation/supersession hooks;
+- retrieving current job state; and
+- a Trigger adapter only while migration is incomplete.
 
-## ⚠️ Gotchas for the next session
-- This machine's terminal sometimes swallows/echoes long multi-line PowerShell — prefer short commands or write-to-file-then-read.
-- **Never edit applied Supabase migrations** (`supabase/migrations/*` already applied) — always add new ones.
-- `web/.env.local` does not exist yet (Vercel injects in prod) — create it for local dev.
-- Android no longer packages `GEMINI_API_KEY`; it still requires authenticated proxy authorization and abuse controls before its AI actions can ship.
+Do not let pages, server actions, exports, or asset code import a runner SDK directly.
 
-op
+### B. Provision Cloudflare through IaC/configuration
+
+Use the official Cloudflare tooling and current vendor documentation. Before changing account resources, inspect the existing account/project state and use the intended authenticated account.
+
+Provision/configure:
+
+- one queue per priority class or an equivalent explicit routing policy;
+- a dead-letter route and replay procedure;
+- a Workflow binding for durable orchestration;
+- least-privilege secret bindings for server-to-server Supabase access;
+- worker observability/logging;
+- deployment configuration committed to the repository.
+
+Do not migrate Supabase Storage to R2 in this package. Existing private Storage and its RLS model are correct product boundaries.
+
+### C. Migrate the full-kit path
+
+Replace the application’s Trigger enqueue call with the runner port and Cloudflare adapter.
+
+The Cloudflare workflow must:
+
+1. load the brand and input versions from Supabase;
+2. create/update the same `generation_jobs` lifecycle record;
+3. execute each artifact or bounded collection as independently retryable work;
+4. persist successful artifacts immediately with lineage metadata;
+5. preserve successful siblings when one item fails;
+6. record safe failure state and retry eligibility; and
+7. finish with a complete, observable job result.
+
+Initial priority classes:
+
+| Class | Examples | Priority |
+| --- | --- | --- |
+| Interactive | single identity or social asset | highest |
+| Standard | selected identity/social/favicon collection | normal |
+| Background | full kit / export rebuild | low |
+| Heavy | video, vectorization, large extraction | separate adapter; not the Cloudflare default without capability validation |
+
+### D. Complete the workspace generation UX
+
+The workspace must expose:
+
+- current job state: queued, running, completed, failed;
+- generated artifact count and safe failure reason;
+- retry/cancel where the runner/provider supports it;
+- generate one selected asset;
+- generate a named collection: identity, favicon, social, guide, stationery;
+- create a custom selection; and
+- create a complete kit as a convenience action.
+
+The guided flow and direct controls must update the same brand/token/reference state and produce the same asset records.
+
+### E. Reference import foundation
+
+After the Cloudflare full-kit path is proven, add image-only reference import first:
+
+- explicit MIME, byte-size, count, and pixel limits;
+- private upload path and `brand_references` record;
+- preview, deletion, retention, and extraction-job state;
+- palette/extraction suggestions that require explicit user application;
+- no document or video input until complete processing, preview, retention, and deletion behavior exists.
+
+## Production acceptance gate
+
+Do not call the migration complete until an authenticated production user can:
+
+1. create a single asset, selected collection, and complete kit;
+2. observe each durable job’s true state in the workspace;
+3. see successful artifacts in private Storage and matching `assets` rows;
+4. download individual assets;
+5. export a selected collection and a complete kit;
+6. recover a failed job without losing sibling artifacts; and
+7. verify that a non-member cannot read jobs, assets, Storage objects, or exports.
+
+## Trigger retirement gate
+
+Only after the Cloudflare acceptance gate passes:
+
+1. remove Trigger from application enqueue paths;
+2. preserve historical Trigger artifacts and job records;
+3. revoke runner-specific runtime secrets only after confirming no active runs depend on them;
+4. remove Trigger dependencies/configuration in one clean change; and
+5. update `CURRENT_STATUS.md`, `GENERATION_SYSTEM.md`, and `roadmap.md` together.
+
+## Primary references
+
+- [Generation system contract](./GENERATION_SYSTEM.md)
+- [Cloudflare Workflows](https://developers.cloudflare.com/workflows/)
+- [Cloudflare Queues](https://developers.cloudflare.com/queues/)
+- [Current state](./CURRENT_STATUS.md)
+- [Roadmap](./roadmap.md)

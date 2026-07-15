@@ -91,7 +91,7 @@ We are explicitly benchmarking against the best payment-gated products in this s
 
 ## 5. The AI Provider Adapter (Pillar 2)
 
-**Chosen standard: the [Vercel AI SDK](https://sdk.vercel.ai) (`ai`) + [Vercel AI Gateway](https://vercel.com/docs/ai-gateway).** This is the single most important "don't handroll" decision — it *is* the adapter you described, already built, and you're already on Vercel.
+**Current implementation:** the `ai` SDK with Google AI Studio and Vertex adapters. A provider registry and structured Zod output are the contract; Vercel AI Gateway is optional, not a selected dependency or production routing path.
 
 - **Unified interface:** `generateText`, `streamText`, `generateObject` (structured output via Zod), `generateImage`. Swapping providers is a one-line model change.
 - **Providers as packages:** `@ai-sdk/google` (default), `@ai-sdk/openai`, `@ai-sdk/xai` (Grok), `@ai-sdk/fal` (image/video), plus the **AI Gateway** for unified routing, key management, spend limits, and failover across all of them.
@@ -116,27 +116,12 @@ Provider (which model vendor) and **credential source** (whose account pays) are
 
 Any future OpenAI, xAI, fal, Gateway, or Google OAuth implementation must be based on current official provider documentation and an explicit entitlement/terms review at the time of implementation. OAuth discovery alone is not evidence that a third-party product may use a token for API inference.
 
-### Concrete credential matrix (our actual setup)
-| Provider | Auth we use | Notes |
-|----------|-------------|-------|
-| **Google** | **API key** (primary) | AI Studio post-pay key (Pro sub) **and** Vertex SA key — both do text/image/video. Free daily + Pro + Vertex cover us. Google OAuth kept but not load-bearing. |
-| **OpenAI** | **OAuth only** | Codex-style (`auth.openai.com`). No API-key lane — we won't fund API credits. |
-| **xAI (Grok)** | **OAuth only** | In-app OAuth login **direct to `auth.x.ai`** (`api:access`). No API-key lane, no proxy. |
+### Current credential and execution boundary
 
-The port models this as: Google → `apiKey` / `serviceAccount` sources; OpenAI + xAI → `oauth` sources (refresh + attach as Bearer). Concrete TS contract sketched in [`ai-credential-resolver.sketch.ts`](./ai-credential-resolver.sketch.ts) — a discriminated-union `CredentialSource` → `CredentialResolver` (handles refresh / SA token minting) → `buildProvider` (maps to the AI SDK). An OAuth access token simply *is* the `apiKey` for the OpenAI/xAI AI-SDK adapters.
-
-### The two lanes (same port, different resolver)
-| | **Studio lane (internal)** | **Prod lane (users)** |
-|--|---------------------------|------------------------|
-| Credentials | Pooled — **Vertex credits** now; add OpenAI/xAI API top-ups as funded | **BYOK** (Vault) or **charge-through** (our keys, Stripe-metered); optional OAuth-Google |
-| Models | All premium / bleeding-edge | Gated by plan |
-| Limits | High | Per-tier |
-| COGS | Ours | ~Zero (BYOK) or passed through |
-
-They deliberately need **not** be feature-equal. Studio can run models the prod tier gates.
-
-### Vercel AI Gateway — supported, not targeted
-Default path is **provider-direct SDKs** (`@ai-sdk/google|openai|xai|fal`). The Gateway is an **optional adapter** for unified billing/observability/failover. Caveat: even with BYOK routed *through* the Gateway, Vercel may still require a funded balance for some image/video providers (e.g. fal) — a reason not to make it the primary path. Swapping in the Gateway is a one-line change in the AI SDK, so we lose nothing by keeping it optional.
+- **Google AI Studio and Vertex** are the only implemented provider adapters.
+- The internal Studio lane uses server-held credentials; the user production BYOK lane has Vault infrastructure but no user-facing configuration or execution flow yet.
+- OpenAI, xAI, fal, OAuth-linked provider accounts, managed charge-through, and Vercel AI Gateway are future adapter decisions—not current product capabilities.
+- Provider and credential choices remain orthogonal: feature code requests a logical capability; a server-only resolver selects an approved provider and credential source.
 
 ---
 
@@ -253,7 +238,7 @@ The production job architecture is defined in [`GENERATION_SYSTEM.md`](../GENERA
 - A request may create one asset, a collection, a custom selection, or a complete kit. Bulk is convenience, never the only path.
 - Jobs carry IDs, version references, and bounded options—not media bytes or secrets.
 - Work is classed by latency and cost: immediate deterministic updates, bounded provider calls, durable asset rendering, long provider operations, and dedicated high-cost media compute.
-- Trigger.dev is the current web-native runner implementation. It is not a blanket commitment for GPU/video, heavy native processing, or broad batch work.
+- Cloudflare Workflows + Queues are the selected durable-work control plane. Trigger.dev is transitional only and is not a blanket commitment for GPU/video, heavy native processing, or broad batch work.
 - Any runner must implement the same request, job, asset, and export contracts so the product is portable across Trigger, Cloudflare, AWS, or Google Cloud.
 
 ---

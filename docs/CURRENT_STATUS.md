@@ -6,7 +6,7 @@ Use this document for what is true now. Use [`roadmap.md`](./roadmap.md) for wha
 
 ## Product
 
-Etymalia is a web-first brand-identity platform built with Next.js, Supabase, Trigger.dev, and shared deterministic generation packages. The Android application is a legacy prototype and is not a constraint on the web product roadmap.
+Etymalia is a web-first brand-identity platform built with Next.js, Supabase, Trigger.dev, and shared deterministic generation packages. Cloudflare Workflows + Queues are the selected next durable-work control plane; Trigger.dev remains transitional until that migration is complete. The Android application is a legacy prototype and is not a constraint on the web product roadmap.
 
 ## Web product
 
@@ -41,8 +41,9 @@ Completed artifacts appear in the workspace and are included in its authenticate
 | Supabase schema | Current migrations are applied to the linked remote project. |
 | Storage | Private `etymalia` bucket with workspace/brand-scoped access policies. |
 | Trigger.dev account | Authenticated as `james@jami.studio`. |
-| Trigger.dev worker | Production version `20260714.7` is deployed with `generate-full-kit`. |
-| Full-kit execution | A production verification run is accepted but currently remains queued; no worker lifecycle record or generated artifacts exist for that run yet. |
+| Trigger.dev worker | Transitional implementation; production version `20260714.7` is deployed, but no further product work is planned on it. |
+| Cloudflare durable work | Selected as the primary production control plane. Workflows + Queues will replace Trigger for product jobs; implementation is the immediate foundation task. |
+| Full-kit execution | Trigger verification run remains queued. It is not a release dependency for the Cloudflare migration path. |
 | Vercel | Web deployment configuration exists. Current deployed web revision is not asserted here. |
 
 ## Release state

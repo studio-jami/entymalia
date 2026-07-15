@@ -12,6 +12,7 @@ Etymalia is a web-first professional brand-identity platform. The Android applic
 - Every AI request is authenticated, authorized, validated, rate/usage limited, observable, and attributable.
 - Brand tokens are the source of truth; all rendered deliverables derive deterministically from them.
 - Long-running media work is durable, idempotent, observable, and reflected in both the UI and the export package.
+- Cloudflare Workflows + Queues are the primary durable-work control plane. AWS remains reserved for the existing EC2/open-weight GPU lane; GCP remains reserved for Vertex media generation unless current account terms explicitly confirm another eligible use of its credits.
 - Guided build accelerates users without constraining them: every stage must also support direct editing, selective generation, comparison, and individual or collection export.
 - Claims of deployment, availability, and vendor support are evidence-bound—not inferred from source configuration.
 
@@ -32,9 +33,9 @@ See [`GENERATION_SYSTEM.md`](./GENERATION_SYSTEM.md) for the portable request/jo
 
 ### Web delivery proof
 
-1. Diagnose why accepted production run `run_cmrlas9yz992t0poanewtq6yi` remains `QUEUED` without a `generation_jobs` record after deployed Trigger version `20260714.7`.
-2. Re-run only after the queue/worker condition is resolved; verify terminal status, expected stored artifact count, and matching `assets` rows.
-3. Confirm the workspace gallery/listing and ZIP-export path against the verified production output.
+1. Implement the Cloudflare Workflows + Queues runner adapter and migrate the full-kit path onto it.
+2. Verify one completed Cloudflare-backed full-kit run has a terminal job record, expected private artifacts, matching `assets` records, workspace previews/downloads, and ZIP contents.
+3. Retire Trigger from the application request path after the Cloudflare path is production-proven.
 
 ### Verification foundation
 

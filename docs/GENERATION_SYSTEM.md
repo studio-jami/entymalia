@@ -152,7 +152,7 @@ Every export is generated from the same asset ledger. The manifest records the e
 
 Streaming means incremental user feedback for a live request or provider response. It does **not** mean keeping an HTTP request open while expensive render/transcode work runs. Long work is durable and reports state through the job ledger.
 
-## Current runner: Trigger.dev
+## Transitional runner: Trigger.dev
 
 Trigger.dev currently provides the fastest integration path because task code lives with the Next.js application and offers durable async tasks, retries, queues, monitoring, realtime APIs, and self-hosting options. The deployed full-kit task is the first implementation of this contract.
 
@@ -169,7 +169,7 @@ Trigger.dev currently provides the fastest integration path because task code li
 - The UI does not yet expose durable job progress, retry, cancellation, or selective generation controls.
 - The current implementation does not yet split expensive work into independently schedulable queues or account for cost/priority.
 
-Trigger is therefore **provisionally suitable**, not permanently selected by assumption.
+Trigger is therefore a **transitional implementation**, not the production control plane.
 
 ## Production target
 
@@ -199,15 +199,14 @@ flowchart LR
 | High-cost CPU/GPU/media work, explicit queues, regional control, auditable orchestration | AWS Step Functions Standard + SQS + ECS/Fargate or AWS Batch | Standard workflows provide auditable execution history; SQS decouples work; Fargate/Batch is appropriate for native and long compute. |
 | GCP-native media/AI pipeline, Cloud Run and Vertex-first strategy | Google Workflows + Cloud Run Jobs/Services + Pub/Sub | Regional orchestration, long waits/polls, service connectors, and a natural fit for Vertex/GCP credits. |
 
-**Recommendation:**
+**Locked decision:**
 
-1. Keep Trigger for the present web-native deterministic kit only after the queue condition is resolved and one live run succeeds.
-2. Do not put video, heavy vectorization, large document/video extraction, or broad batch regeneration into the same Trigger task by default.
-3. Before adding high-cost media features, choose one dedicated compute lane based on the provider actually used:
-   - **GCP** if Vertex and Cloud Run are the principal AI/media path.
-   - **AWS** if the product needs strong queueing, Fargate/Batch, MediaConvert, and operations-grade execution control.
-   - **Cloudflare** if edge delivery, Workers, R2, and Workflows become the dominant platform.
-4. Keep the request, job, asset, and export contracts above unchanged so a runner migration changes adapters, not product behavior.
+1. **Cloudflare Workflows + Queues** are the primary durable-work control plane. Workflows own orchestration, state, retries, waits, and lifecycle; Queues provide buffering, retry, dead-letter, and pull-consumer capability.
+2. **Supabase remains the product system of record** for Auth, Postgres/RLS, private brand storage, job/asset/export ledgers, and signed delivery. Cloudflare does not create a second product database or storage truth.
+3. **AWS is reserved** for the established EC2/open-weight GPU lane and future workloads that genuinely require AWS-specific heavy compute. It is not the default brand-kit runner while that runway is constrained.
+4. **GCP is reserved** for Vertex media generation. Treat Cloud Run or other GCP-credit eligibility as unconfirmed until verified against the account's current program terms; do not budget product compute on an assumed credit entitlement.
+5. Trigger remains deployed only as a transitional reference until Cloudflare-backed full-kit execution is production-proven, then it leaves the application request path.
+6. Keep the request, job, asset, and export contracts unchanged so a runner migration changes adapters, not product behavior.
 
 ## Required production controls
 
