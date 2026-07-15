@@ -4,7 +4,7 @@
 
 **Current source of truth:** [`CURRENT_STATUS.md`](./CURRENT_STATUS.md)
 
-Etymalia is becoming a professional brand-identity platform. The web app is the primary product track; Android remains a separate native client and must meet its own security and reliability release bar.
+Etymalia is a web-first professional brand-identity platform. The Android application is a legacy prototype and is intentionally outside this roadmap.
 
 ## Non-negotiable end shape
 
@@ -22,18 +22,12 @@ Etymalia is becoming a professional brand-identity platform. The web app is the 
 | Vault-backed Google credential store | Implemented server-side only; no user-facing BYOK flow. |
 | Phase 1 web: names, palette, SVG identity, SVG favicon, ZIP export | Implemented; historical live verification exists but was not re-run in this audit. |
 | Phase 2 social renderer and Trigger task | Trigger Cloud production version `20260714.7` is deployed; the durable task now emits social, identity, and favicon artifacts with RLS-scoped lifecycle records. A post-deployment successful task run still needs artifact-count verification. Persisted assets have previews/downloads and authenticated ZIP export support. |
-| Android Compose / Room client | Implemented as a prototype; AI proxy authentication and hardening are release blockers. |
+| Android Compose / Room client | Legacy prototype; outside the web product roadmap. |
 | Phase 3 and Phase 4 product capabilities | Not implemented, except the Phase 4 membership schema/RLS foundation. |
 
 ## 0. Release integrity — do first
 
-### Android AI gateway
 
-1. Implement Supabase authentication/session handling in Android.
-2. Make the Edge Function require authenticated users; authorize a fixed server-side operation/model allowlist.
-3. Validate request shape and media bounds; enforce rate/usage limits and safe error mapping.
-4. Remove fabricated video-success behavior and implement real operation polling, retrieval, storage, playback, and export—or remove video from the product until it is real.
-5. Define backup/retention policy for generated and reference media; avoid storing unbounded Base64 blobs in Room.
 
 ### Web delivery proof
 
@@ -43,7 +37,7 @@ Etymalia is becoming a professional brand-identity platform. The web app is the 
 
 ### Verification foundation
 
-- Repair and run Android unit/snapshot tests; add repository and proxy-contract coverage.
+
 - Add web unit/integration tests for the deterministic engines, server actions, export route, and Trigger task boundaries.
 - Select monitoring and analytics vendors before adding integrations; do not claim Sentry or PostHog coverage while neither is configured.
 
@@ -74,12 +68,7 @@ Etymalia is becoming a professional brand-identity platform. The web app is the 
 - Brand-audit feedback loop, premium templates, and documented public export API.
 - Capacity, cost, privacy, retention, incident response, and observability runbooks before scaling user media workloads.
 
-## Android quality track
 
-- Move user-visible strings to resources and add accessibility semantics.
-- Replace destructive Room migration fallback with explicit migrations and schema export.
-- Implement native share/export for only genuinely generated assets.
-- Remove unused dependencies and legacy Firebase catalog entries.
 
 ## Planned tooling versus implementation
 
