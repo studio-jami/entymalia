@@ -109,6 +109,14 @@ These are queued after the portable-generation foundation; their product directi
 5. **Commercial and collaboration** — BYOK, templates, invitations, entitlements, billing, then public API.
 6. **Heavy media and scale** — dedicated compute only after a workload meets the roadmap entry criteria.
 
+### Commercial billing foundation
+
+- [x] Add server-side Stripe Checkout with dashboard-managed promotion-code entry and Stripe's hosted customer portal.
+- [x] Project signed Checkout/subscription/invoice events into Supabase and use an append-only, idempotent credit ledger for generation authorization.
+- [x] Remotely apply the entitlement migration and deploy the signed production webhook endpoint `https://etymalia.jami.studio/api/stripe/webhook`.
+- [x] Create the three Etymalia recurring Prices, set their credit allocations, and create the requested package-specific promotion codes. Personal is $30 monthly/$300 yearly with 3/36 credits; Entrepreneur is $60/$600 with 6/72; Business is $90/$900 with 9/108. Each annual-only 100%-off code permits one redemption.
+- [ ] Complete a live paid/coupon Checkout and verify subscription projection, credit allocation, portal access, one credit debit, and the resulting full-kit lifecycle as a newly authenticated user.
+
 ## Trigger retirement gate
 
 Do not remove Trigger until selective Cloudflare-backed generation passes production verification. Then preserve historical records and artifacts, confirm no active run depends on Trigger, revoke runner-specific credentials, remove Trigger configuration and dependencies in one clean change, and update [Product](./product.md), this plan, and the [roadmap](./roadmap.md) together.
@@ -131,5 +139,7 @@ Do not remove Trigger until selective Cloudflare-backed generation passes produc
 | 2026-07-15 | GitHub Actions run `29456382123` published the staging renderer image. Deployed staging Worker version `706c226c-0da3-4659-9e79-a4b5a634f2f0` created the one-instance private Container application. A later staging Workflow instance `be279998-458c-4cf0-b01a-a05ceab047fe` completed its internal Container health step successfully; no Supabase credentials or product data were used. |
 | 2026-07-15 | Provisioned staging-only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` as Cloudflare Worker secret bindings through Wrangler. Verified binding names only. The Worker does not yet consume them; authorized data loading and product persistence remain separately gated adapter work. |
 | 2026-07-16 | Completed the real staging Cloudflare full-kit proof. Workflow `806e7443-236c-4060-b1a9-379908aa583a` completed successfully after dispatching the private Container. Job `6cec40a6-87e5-40bd-943e-6cf9e45dbd06` completed with Cloudflare runner lineage, 45 private Storage objects, 45 matching `assets` records, and no terminal error. |
+| 2026-07-16 | Added and remotely applied the Stripe/Supabase entitlement ledger and its concurrency correction. Deployed Checkout, portal, and signature-verified webhook routes to `etymalia.jami.studio`; provisioned Stripe endpoint `we_1TtjMbLHeqO273z7796jn5xM` with lifecycle and payment events, and verified a signed production webhook smoke request. Product/Price/coupon terms remain an explicit commercial decision. |
+| 2026-07-16 | Created and deployed the live Etymalia Stripe catalog and six server-only Price bindings: Personal ($30/$300), Entrepreneur ($60/$600), and Business ($90/$900). Annual plans receive twelve months of credits up front and have one-redemption, annual-product-scoped 100%-off promotion codes. |
 FINIsH THE PLAN _ COMPLETELY _ 100% CONNECTED AND VERFIFIED - NO MORE EXCUSES - YOU HAVE FULL ACCESS AND EVERYTHING YOU NEED - Out OF MY CHAt _ DO NOT COME BACK TO CHAT UNTIL EVERY SINGLE ITEM PLUS HAS BEEN FULLY COMPLETED AND VERIFIED
 FIX ISSUES FINISH PLAN NOW

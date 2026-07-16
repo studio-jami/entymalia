@@ -17,6 +17,8 @@ The product is designed around one shared brand state: guided creation helps use
 - Authenticated ZIP export of deterministic assets, with persisted generated artifacts included when available; exports fail closed when a selected persisted artifact is unavailable.
 - A request-first generation ledger with source-version snapshot, idempotency key, runner metadata, and authorized job-state read model.
 - Persisted asset previews and signed downloads for completed worker artifacts.
+- Stripe Checkout and Stripe's hosted customer portal routes, with promotion-code entry enabled at Checkout.
+- A Supabase-backed billing projection: Stripe customer/subscription state, idempotent webhook-event records, and an append-only credit ledger. Full-kit requests atomically reserve one credit and refund it if runner enqueueing fails.
 - An isolated Cloudflare staging Worker, Queue, dead-letter queue, and Workflow foundation. It accepts only bounded job references in its harmless proof path and does not access product data.
 
 ## Implemented source path, not operationally verified
@@ -25,6 +27,10 @@ A Trigger-backed `generate-full-kit` task exists behind a runner-neutral adapter
 
 Source alone does not prove that a remote Trigger deployment is current, that a queued run completed, or that its artifacts are visible in a deployed workspace. Treat those as **requires remote verification**.
 
+## Billing configuration boundary
+
+The live Stripe webhook endpoint is `https://etymalia.jami.studio/api/stripe/webhook`; it verifies Stripe signatures before projecting events to Supabase. The live catalog has Personal ($30 monthly / $300 yearly), Entrepreneur ($60 / $600), and Business ($90 / $900) subscriptions. They allocate 3/6/9 full-kit credits per month, or 36/72/108 on annual payment. The annual promotion codes `ETYMALIA-PERSONAL-YEARLY`, `ETYMALIA-ENTREPRENEUR-YEARLY`, and `ETYMALIA-BUSINESS-YEARLY` are each restricted to their separate annual product, apply a one-time 100% discount, and permit one redemption. Price IDs and credit allocations are server-only production environment variables.
+
 ## Not implemented
 
 - A Cloudflare-backed product runner: no Worker secret bindings, Supabase job integration, compute adapter, or application enqueue adapter is implemented.
@@ -32,7 +38,7 @@ Source alone does not prove that a remote Trigger deployment is current, that a 
 - Reference upload, extraction, retention, and deletion workflow.
 - Customer-facing provider OAuth, BYOK settings, or provider-backed generation.
 - Persisted export records and manifests.
-- Brand guide PDF, stationery/templates, billing, invitations, public export API, registrar operations, and social/SEO availability.
+- Brand guide PDF, stationery/templates, invitations, public export API, registrar operations, and social/SEO availability.
 
 ## Release boundary
 
@@ -40,4 +46,4 @@ The deterministic brief-to-name-to-palette-to-identity-to-ZIP workflow is the cu
 
 ## External state
 
-Remote verification on 2026-07-15 confirmed that the linked Supabase migrations through `20260715130000` are applied and the `etymalia` Storage bucket is private. The isolated Cloudflare staging foundation is also deployed; its evidence is in the [delivery plan](./plan.md). OAuth enablement, Trigger deployment state, and Vercel deployment state remain external and unverified from this repository.
+Remote verification on 2026-07-16 confirmed that the billing migrations through `20260716061000` are applied; the signed Stripe webhook route is deployed to the live URL and returned a successful signature-verified smoke response. The isolated Cloudflare staging foundation is also deployed; its evidence is in the [delivery plan](./plan.md). OAuth enablement and completed production generation remain separately unverified.

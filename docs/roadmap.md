@@ -69,7 +69,7 @@ Evaluate guide renderers against visual quality, deployment compatibility, perfo
 
 **Goal:** add depth only after the generation and export foundation is production-proven.
 
-In order: provider settings/BYOK, persisted templates and stationery, invitations and audit events, server-enforced entitlements, billing after commercial responsibilities are defined, then a public export API after the internal contract is stable.
+In order: provider settings/BYOK, persisted templates and stationery, invitations and audit events, server-enforced entitlements, billing after commercial responsibilities are defined, then a public export API after the internal contract is stable. The initial Stripe/Supabase entitlement boundary is in place; its live catalog, promotion terms, and a customer journey remain delivery-plan work rather than assumed product policy.
 
 ## Milestone 6 — Heavy media and scale
 

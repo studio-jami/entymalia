@@ -4,6 +4,8 @@ import { createBrand, createWorkspace } from "./actions";
 import { AuthButton } from "@/components/auth-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/server";
+import { billingPlans } from "@/lib/billing/stripe";
+import { BillingControls } from "@/components/billing-controls";
 
 type Workspace = {
   id: string;
@@ -29,12 +31,14 @@ export default async function WorkspacePage({
   const { data: auth, error: authError } = await supabase.auth.getUser();
   if (authError || !auth.user) redirect("/");
 
-  const [{ data: workspaceData, error: workspaceError }, { data: brandData, error: brandError }] = await Promise.all([
+  const [{ data: workspaceData, error: workspaceError }, { data: brandData, error: brandError }, { data: creditRows, error: creditError }, { data: billingCustomer, error: billingError }] = await Promise.all([
     supabase.from("workspaces").select("id, name, plan").order("updated_at", { ascending: false }),
     supabase.from("brands").select("id, workspace_id, name, status").order("updated_at", { ascending: false }),
+    supabase.from("credit_ledger").select("amount"),
+    supabase.from("billing_customers").select("user_id").eq("user_id", auth.user.id).maybeSingle(),
   ]);
 
-  if (workspaceError || brandError) {
+  if (workspaceError || brandError || creditError || billingError) {
     throw new Error("Unable to load your workspace library.");
   }
 
@@ -62,6 +66,9 @@ export default async function WorkspacePage({
       </section>
 
       {error ? <p className="status status--warning">We could not save that change. Please try again.</p> : null}
+
+      <p className="status">{(creditRows ?? []).reduce((total, row) => total + (row.amount as number), 0)} generation credits available</p>
+      <BillingControls plans={billingPlans()} hasBillingAccount={Boolean(billingCustomer)} />
 
       {workspaces.length === 0 ? (
         <section className="workspace-empty" aria-labelledby="workspace-bootstrap-title">

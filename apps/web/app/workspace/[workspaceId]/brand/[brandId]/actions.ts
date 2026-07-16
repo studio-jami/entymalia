@@ -10,6 +10,7 @@ import { attachRunnerRun, createQueuedGenerationJob, updateGenerationJob } from 
 import { briefKeywords, parseBriefForm, parseBriefRecord } from "@/lib/brand/brief";
 import { generationRunner } from "@/lib/generation/trigger-runner";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { consumeGenerationCredit, refundGenerationCredit } from "@/lib/billing/entitlements";
 import { createClient } from "@/lib/supabase/server";
 
 const UUID = /^[0-9a-fA-F-]{36}$/;
@@ -21,6 +22,7 @@ interface Ids {
 
 interface EditableBrand {
   supabase: Awaited<ReturnType<typeof createClient>>;
+  userId: string;
   brand: { id: string; workspace_id: string; name: string; brief: unknown; updated_at: string };
 }
 
@@ -64,7 +66,7 @@ async function requireEditableBrand(target: Ids): Promise<EditableBrand> {
     done(target, "?error=forbidden");
   }
 
-  return { supabase, brand: brand as EditableBrand["brand"] };
+  return { supabase, userId: auth.user.id, brand: brand as EditableBrand["brand"] };
 }
 
 async function requireCandidate(
@@ -158,7 +160,7 @@ export async function checkDomain(formData: FormData) {
 
 export async function generateFullKit(formData: FormData) {
   const target = ids(formData);
-  const { supabase, brand } = await requireEditableBrand(target);
+  const { supabase, brand, userId } = await requireEditableBrand(target);
   const { data: tokenRow, error: tokenError } = await supabase
     .from("brand_tokens")
     .select("version")
@@ -182,11 +184,17 @@ export async function generateFullKit(formData: FormData) {
     request,
   });
 
+  if (!await consumeGenerationCredit(supabase, job.id)) {
+    await admin.from("generation_jobs").delete().eq("id", job.id);
+    done(target, "?error=credits-needed#identity");
+  }
+
   try {
     const { runId } = await generationRunner().enqueue({ jobId: job.id, idempotencyKey: request.idempotencyKey });
     await attachRunnerRun(admin, job.id, "trigger", runId);
   } catch (error) {
     await updateGenerationJob(admin, job.id, "failed", error).catch(() => undefined);
+    await refundGenerationCredit(admin, userId, job.id).catch(() => undefined);
     done(target, "?error=full-kit#identity");
   }
 
