@@ -38,9 +38,11 @@ export class FullKitWorkflow extends WorkflowEntrypoint<Env, GenerationQueueMess
         const message = typeof failure?.error === "string" ? failure.error : `status ${response.status}`;
         throw new Error(`Renderer request failed: ${message}`);
       }
-      const payload = await response.json() as { accepted?: unknown };
-      if (payload.accepted !== true) throw new Error("Renderer did not accept the generation job");
-      return { accepted: true };
+      const payload = await response.json() as { count?: unknown; skipped?: unknown };
+      if (typeof payload.count !== "number" || typeof payload.skipped !== "boolean") {
+        throw new Error("Renderer returned an invalid completion result");
+      }
+      return { count: payload.count, skipped: payload.skipped };
     });
 
     return { ...accepted, result };
