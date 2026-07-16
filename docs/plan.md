@@ -77,9 +77,9 @@ Do not deploy production resources or make Cloudflare the active runner until th
 - [x] Provision staging-only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` Worker secrets through Wrangler's secret interface. Both bindings were verified by name only on 2026-07-15; their values are not recorded or available to browser clients.
 - [ ] Reload authorized, versioned inputs from Supabase inside durable execution, using the staging-only secret bindings. Do not add those values to source, configuration, queue payloads, logs, or browser state.
 - [x] Decide and document the rendering compute boundary: Cloudflare Containers will run the Node-compatible deterministic full-kit renderer behind a private Worker binding. AWS remains reserved for a future workload that demonstrably exceeds this envelope. Preserve the existing job, asset, and export contract.
-- [ ] Persist artifacts and lineage incrementally so successful siblings survive partial failures.
-- [ ] Record safe failure state, retry eligibility, and terminal lifecycle state in `generation_jobs`.
-- [ ] Add observable retry and dead-letter behavior.
+- [x] Persist artifacts and lineage incrementally so successful siblings survive partial failures. Verified on 2026-07-16: staging job `6cec40a6-87e5-40bd-943e-6cf9e45dbd06` completed with 45 private Storage objects and 45 matching `assets` records.
+- [x] Record safe failure state, retry eligibility, and terminal lifecycle state in `generation_jobs`. The verified staging job attached runner `cloudflare:staging-full-kit-20260715-05`, reached `completed`, recorded `completed_at`, and cleared error fields. Earlier controlled failures retained artifacts and recorded the safe generic user-facing error state.
+- [x] Add observable retry and dead-letter behavior. The staging Workflow retried controlled Container failures with recorded step evidence; Queue and DLQ bindings remain deployed. Production-level queue replay evidence remains part of the production gate.
 
 **Done when:** a Cloudflare-backed full-kit request has a complete auditable lifecycle and preserves successful artifacts after a sibling failure.
 
@@ -130,3 +130,6 @@ Do not remove Trigger until selective Cloudflare-backed generation passes produc
 | 2026-07-15 | Added the staging image-publish secret as a 90-day, `Workers Containers: Edit`-only Cloudflare account token. Verified only the GitHub secret name; its value is not recorded. Image publication, Container-enabled Worker deployment, and all product-data integration remain pending. |
 | 2026-07-15 | GitHub Actions run `29456382123` published the staging renderer image. Deployed staging Worker version `706c226c-0da3-4659-9e79-a4b5a634f2f0` created the one-instance private Container application. A later staging Workflow instance `be279998-458c-4cf0-b01a-a05ceab047fe` completed its internal Container health step successfully; no Supabase credentials or product data were used. |
 | 2026-07-15 | Provisioned staging-only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` as Cloudflare Worker secret bindings through Wrangler. Verified binding names only. The Worker does not yet consume them; authorized data loading and product persistence remain separately gated adapter work. |
+| 2026-07-16 | Completed the real staging Cloudflare full-kit proof. Workflow `806e7443-236c-4060-b1a9-379908aa583a` completed successfully after dispatching the private Container. Job `6cec40a6-87e5-40bd-943e-6cf9e45dbd06` completed with Cloudflare runner lineage, 45 private Storage objects, 45 matching `assets` records, and no terminal error. |
+FINIsH THE PLAN _ COMPLETELY _ 100% CONNECTED AND VERFIFIED - NO MORE EXCUSES - YOU HAVE FULL ACCESS AND EVERYTHING YOU NEED - Out OF MY CHAt _ DO NOT COME BACK TO CHAT UNTIL EVERY SINGLE ITEM PLUS HAS BEEN FULLY COMPLETED AND VERIFIED
+FIX ISSUES FINISH PLAN NOW
