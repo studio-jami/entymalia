@@ -108,7 +108,7 @@ export async function renderFullKit(input: FullKitRenderInput): Promise<FullKitA
       category: "favicon",
       filename: artifact.filename,
       data: artifact.data,
-      contentType: artifact.contentType,
+      contentType: artifact.filename.endsWith(".webmanifest") ? "application/json" : artifact.contentType,
       kind: "favicon",
       variant: artifact.purpose,
       format,
