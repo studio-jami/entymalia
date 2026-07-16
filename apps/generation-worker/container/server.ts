@@ -98,8 +98,10 @@ createServer(async (request, response) => {
     const body = await new Promise<string>((resolve, reject) => { let value = ""; request.on("data", (chunk) => { value += chunk; }); request.on("end", () => resolve(value)); request.on("error", reject); });
     const input = JSON.parse(body) as { jobId?: unknown; idempotencyKey?: unknown; runnerRunId?: unknown };
     if (typeof input.jobId !== "string" || typeof input.idempotencyKey !== "string" || typeof input.runnerRunId !== "string") throw new Error("Invalid render request.");
-    const result = await generate(input.jobId, input.idempotencyKey, input.runnerRunId);
-    response.writeHead(200, { "content-type": "application/json" }); response.end(JSON.stringify(result));
+    void generate(input.jobId, input.idempotencyKey, input.runnerRunId).catch((error) => {
+      console.error("Renderer job failed", error instanceof Error ? error.message.slice(0, 240) : "Unknown renderer failure");
+    });
+    response.writeHead(202, { "content-type": "application/json" }); response.end(JSON.stringify({ accepted: true }));
   } catch (error) {
     const failure = error instanceof Error ? error.message.slice(0, 240) : "Unknown renderer failure";
     console.error("Renderer request failed", failure);
