@@ -311,7 +311,7 @@ export default async function BrandPage({
                 <div className="asset-card__meta">
                   <strong>{asset.variant || asset.kind}</strong>
                   <span>{asset.lockup || asset.format}{asset.meta.width && asset.meta.height ? ` · ${asset.meta.width}×${asset.meta.height}` : ""}</span>
-                  {asset.signedUrl ? <a className="text-link" href={asset.signedUrl} download>Download PNG</a> : null}
+                  {asset.signedUrl ? <a className="text-link" href={asset.signedUrl} download>Download asset</a> : null}
                 </div>
               </article>
             ))}

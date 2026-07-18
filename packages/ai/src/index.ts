@@ -342,9 +342,18 @@ function selectLiveImageModel(models: ProviderModel[], lane: MediaLane): Provide
       // models. Their documented generation method is generateContent; Imagen
       // models use predict. Both are selected by capability family, never an ID.
       : /^(?:gemini)|imagen/i.test(candidate.id))
-    .sort((left, right) => compareVersion(right.version, left.version) || right.id.localeCompare(left.id))[0];
+    .sort((left, right) => imageQualityRank(right) - imageQualityRank(left) || compareVersion(right.version, left.version) || right.id.localeCompare(left.id))[0];
   if (!model) throw new Error(`No live ${lane} image-generation model is available for this account.`);
   return model;
+}
+
+/** Prefer the provider's premium image family without pinning a vendor model. */
+function imageQualityRank(model: ProviderModel): number {
+  const descriptor = `${model.id} ${model.displayName}`.toLowerCase();
+  return (descriptor.includes("pro") ? 100 : 0)
+    + (descriptor.includes("lite") ? -100 : 0)
+    + (descriptor.includes("flash") ? -10 : 0)
+    + (descriptor.includes("preview") ? -2 : 0);
 }
 
 function mediaPrompt(request: BrandMediaRequest): string {
@@ -353,7 +362,7 @@ function mediaPrompt(request: BrandMediaRequest): string {
     `Business: ${request.description || request.industry}.`,
     `Keywords: ${request.keywords.join(", ") || "craft, clarity"}. Tone: ${request.tone.join(", ") || "refined"}.`,
     `Palette: primary ${request.palette.primary}, accent ${request.palette.accent}, paper ${request.palette.paper}.`,
-    "Art direction: original, editorial, sophisticated, minimal composition, no stock photography, no gradients, no mockup devices, no readable text, no letters, no logos, no watermarks.",
+    "Art direction: original premium brand territory, art-directed editorial composition, tactile material nuance, considered negative space, restrained hierarchy, no stock photography, no gradients, no mockup devices, no readable text, no letters, no logos, no watermarks.",
   ].join("\n");
 }
 
