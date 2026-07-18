@@ -1,9 +1,10 @@
 FROM node:22-bookworm-slim
 
-WORKDIR /app
-ARG APP_DIR=app
-COPY ${APP_DIR} ./
+WORKDIR /workspace
+COPY . ./
+RUN corepack enable && pnpm install --frozen-lockfile && pnpm --filter etymalia-generation-worker deploy --legacy --prod /app
 
+WORKDIR /app
 ENV PORT=8080
 EXPOSE 8080
 

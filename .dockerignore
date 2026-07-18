@@ -1,0 +1,9 @@
+.git
+.env
+.env.*
+node_modules
+**/node_modules
+.next
+.turbo
+apps/generation-worker/container/app
+apps/generation-worker/container/app-*
